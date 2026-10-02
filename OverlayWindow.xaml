@@ -4,7 +4,19 @@
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ResizeMode="NoResize"
         SizeToContent="WidthAndHeight" WindowStartupLocation="Manual">
-    <Border x:Name="Frame" BorderThickness="2" BorderBrush="Transparent" Background="Transparent">
-        <Image x:Name="Img" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" />
-    </Border>
+    <Grid>
+        <Border x:Name="Frame" BorderThickness="2" BorderBrush="Transparent" Background="Transparent">
+            <!-- Image or MediaElement is added here from code -->
+            <Grid x:Name="Host" />
+        </Border>
+
+        <!-- Resize handle, visible in edit mode only -->
+        <Border x:Name="Grip" Width="20" Height="20" CornerRadius="10"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                Background="DeepSkyBlue" BorderBrush="White" BorderThickness="2"
+                Cursor="SizeNWSE" Visibility="Collapsed"
+                MouseLeftButtonDown="Grip_MouseDown"
+                MouseMove="Grip_MouseMove"
+                MouseLeftButtonUp="Grip_MouseUp" />
+    </Grid>
 </Window>

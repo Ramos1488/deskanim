@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using Drawing = System.Drawing;
 using Forms = System.Windows.Forms;
@@ -9,17 +11,32 @@ namespace DeskAnim;
 
 public partial class App : Application
 {
+    private const string MutexName = "DeskAnim.SingleInstance";
+    private static Mutex? _mutex;
+
     private readonly List<OverlayWindow> _overlays = new();
+    private AppSettings _settings = new();
     private Forms.NotifyIcon? _tray;
     private Forms.ToolStripMenuItem? _editItem;
     private MainWindow? _library;
 
     public bool IsExiting { get; private set; }
     public bool EditMode { get; private set; }
+    public bool DarkTheme => _settings.DarkTheme;
 
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        _mutex = new Mutex(true, MutexName, out bool created);
+        if (!created)
+        {
+            Shutdown();
+            return;
+        }
+
+        _settings = SettingsStore.Load();
+        ApplyTheme(_settings.DarkTheme);
         CreateTray();
 
         foreach (var s in LayoutStore.Load())
@@ -31,25 +48,70 @@ public partial class App : Application
         ShowLibrary();
     }
 
+    private void ApplyTheme(bool dark)
+    {
+        Resources.MergedDictionaries[0] = new ResourceDictionary
+        {
+            Source = new Uri(dark ? "Themes/Dark.xaml" : "Themes/Light.xaml", UriKind.Relative)
+        };
+        if (_library != null) Native.UseDarkTitleBar(_library, dark);
+        ApplyTrayTheme(dark);
+    }
+
     private void CreateTray()
     {
         _editItem = new Forms.ToolStripMenuItem("Edit mode") { CheckOnClick = true };
         _editItem.CheckedChanged += (_, _) => SetEditMode(_editItem.Checked);
 
+        var darkItem = new Forms.ToolStripMenuItem("Dark theme")
+        {
+            CheckOnClick = true,
+            Checked = _settings.DarkTheme
+        };
+        darkItem.CheckedChanged += (_, _) =>
+        {
+            _settings.DarkTheme = darkItem.Checked;
+            SettingsStore.Save(_settings);
+            ApplyTheme(_settings.DarkTheme);
+        };
+
         var menu = new Forms.ContextMenuStrip();
         menu.Items.Add("Library", null, (_, _) => ShowLibrary());
         menu.Items.Add(_editItem);
+        menu.Items.Add(darkItem);
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add("Exit", null, (_, _) => ExitApp());
 
+        Drawing.Icon icon = Drawing.SystemIcons.Application;
+        try
+        {
+            if (Environment.ProcessPath is { } exe)
+                icon = Drawing.Icon.ExtractAssociatedIcon(exe) ?? icon;
+        }
+        catch (Exception)
+        {
+            // Fall back to the default icon.
+        }
+
         _tray = new Forms.NotifyIcon
         {
-            Icon = Drawing.SystemIcons.Application,
+            Icon = icon,
             Text = "DeskAnim",
             Visible = true,
             ContextMenuStrip = menu
         };
         _tray.DoubleClick += (_, _) => ShowLibrary();
+        ApplyTrayTheme(_settings.DarkTheme);
+    }
+
+    private void ApplyTrayTheme(bool dark)
+    {
+        if (_tray?.ContextMenuStrip is not { } menu) return;
+        menu.Renderer = dark
+            ? new Forms.ToolStripProfessionalRenderer(new DarkColors())
+            : new Forms.ToolStripProfessionalRenderer();
+        menu.ForeColor = dark ? Drawing.Color.FromArgb(0xE8, 0xE8, 0xEE) : Drawing.SystemColors.ControlText;
+        menu.BackColor = dark ? Drawing.Color.FromArgb(0x2A, 0x2A, 0x32) : Drawing.SystemColors.Menu;
     }
 
     public void ShowLibrary()

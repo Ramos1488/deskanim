@@ -15,6 +15,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         Loaded += async (_, _) => await RefreshAsync();
+        SourceInitialized += (_, _) => Native.UseDarkTitleBar(this, ((App)Application.Current).DarkTheme);
     }
 
     private async Task RefreshAsync() =>
@@ -28,7 +29,7 @@ public partial class MainWindow : Window
         var dlg = new OpenFileDialog
         {
             Multiselect = true,
-            Filter = "Images|*.gif;*.png;*.jpg;*.jpeg;*.bmp"
+            Filter = "Images and video|*.gif;*.png;*.jpg;*.jpeg;*.bmp;*.mp4;*.wmv;*.avi;*.mov;*.webm;*.mkv"
         };
         if (dlg.ShowDialog() != true) return;
 

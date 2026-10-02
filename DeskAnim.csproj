@@ -7,11 +7,16 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <RootNamespace>DeskAnim</RootNamespace>
+    <AssemblyName>DeskAnim</AssemblyName>
+    <Version>0.1.0</Version>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="app.ico" />
     <None Update="assets\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
