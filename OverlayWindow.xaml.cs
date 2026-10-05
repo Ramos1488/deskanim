@@ -21,6 +21,8 @@ public partial class OverlayWindow : Window
     private Point _resizeStartScreen;
     private double _resizeStartWidth;
 
+    public string FilePath => _filePath;
+
     public OverlayWindow(string filePath, LayerState? state)
     {
         InitializeComponent();

@@ -1,21 +1,39 @@
 # DeskAnim
 
-**DeskAnim** is a simple Windows application that lets you pin images and GIFs on top of all windows.
+Free, open-source desktop animation overlay for Windows (GIFs and images on your desktop).
 
-Drop a photo or GIF — it stays above every other application. Perfect for desktop decoration, meme animations, small characters, or just nice floating elements.
+## Install
+Download `DeskAnim-Setup-x.y.z.exe` from Releases. The installer adds a desktop shortcut (optional autostart)
+and registers an uninstaller (Settings > Apps, or Start menu).
 
-## Features
+## Build
+Requires the .NET 8 SDK.
 
-- Pin images and GIFs on top of all windows
-- Support for common formats (PNG, JPG, GIF, etc.)
-- Easy control of position and size
-- Works over any application
-- Russian interface (for now)
+    dotnet run
 
-## Installation
+Build the installer (also needs Inno Setup 6):
 
-Download the latest release from the [Releases](../../releases) page and run it.
+    build-installer.bat
+
+Output: `dist\DeskAnim-Setup-0.1.0.exe`. Pushing a `v*` tag builds and attaches it to a GitHub release automatically.
+
+## Usage
+- Add files to the library, double-click an item to place it on the desktop.
+- Tray icon: **Edit mode** (drag to move, drag the blue corner handle or use the mouse wheel to resize, right click to remove) and **Dark theme**.
+- Video (mp4/H.264 works best) plays muted and looped; no transparency yet.
+- Outside edit mode, layers are click-through. Data lives in `%AppData%/DeskAnim`.
+
+## Roadmap
+- [ ] Video with alpha (WebM), WEBP/APNG, sprite sheets
+- [ ] Giphy/Tenor source (user-provided API key)
+- [ ] Bundled CC0 examples
+- [ ] Local background removal (ONNX Runtime)
 
 ## License
+MIT (code only; see `assets/LICENSES.md` for bundled assets).
 
-MIT
+## Release signing (optional)
+Releases are built on GitHub Actions. If the `SIGNPATH_API_TOKEN` and `SIGNPATH_ORGANIZATION_ID` secrets are set,
+the installer is signed through [SignPath Foundation](https://signpath.org). Each release also includes a `.sha256` file:
+
+    certutil -hashfile DeskAnim-Setup-0.1.0.exe SHA256

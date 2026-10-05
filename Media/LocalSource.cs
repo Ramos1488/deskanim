@@ -9,8 +9,6 @@ namespace DeskAnim.Media;
 
 public sealed class LocalSource : IMediaSource
 {
-    private static readonly string[] Extensions = { ".gif", ".png", ".jpg", ".jpeg", ".bmp" };
-
     public string Name => "My library";
 
     public LocalSource() => Directory.CreateDirectory(AppPaths.Library);
@@ -32,7 +30,7 @@ public sealed class LocalSource : IMediaSource
     public Task<IReadOnlyList<MediaItem>> SearchAsync(string query, CancellationToken ct = default)
     {
         var items = Directory.EnumerateFiles(AppPaths.Library)
-            .Where(f => Extensions.Contains(Path.GetExtension(f).ToLowerInvariant()))
+            .Where(MediaKinds.IsSupported)
             .Where(f => string.IsNullOrWhiteSpace(query) ||
                         Path.GetFileNameWithoutExtension(f).Contains(query, StringComparison.OrdinalIgnoreCase))
             .Select(f => new MediaItem(f, Path.GetFileNameWithoutExtension(f), f, Name))

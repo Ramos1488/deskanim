@@ -139,6 +139,18 @@ public partial class App : Application
         SaveLayout();
     }
 
+    public void RemoveOverlaysByFile(string filePath)
+    {
+        foreach (var w in _overlays
+            .Where(o => string.Equals(o.FilePath, filePath, StringComparison.OrdinalIgnoreCase))
+            .ToList())
+        {
+            _overlays.Remove(w);
+            w.Close();
+        }
+        SaveLayout();
+    }
+
     public void ClearOverlays()
     {
         foreach (var w in _overlays.ToList()) w.Close();
